@@ -1,0 +1,8 @@
+{
+"applicationId": "32d7ad81-811f-4340-a6f4-96514d963dfa",
+"applicationSecret": "Hsy.O9OeHdoUQ/.BJ2m3y]DyxM6Ji130",
+"tenantId": "4e96384d-ff3d-42e0-9d99-e0bb0706b2e9",
+"redirectUri": "https://localhost:8080",
+"userFileName": "users",
+"searchParam": "\"INC00\""
+}
