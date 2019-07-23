@@ -53,7 +53,7 @@ namespace Saorsa.Outlook.Mail
             if(fileName.Contains(".txt")){
                 path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), fileName);
             }
-           else{
+            else{
                 path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), fileName + ".txt");
             }
             fileContent = System.IO.File.ReadAllText(path);
@@ -63,6 +63,7 @@ namespace Saorsa.Outlook.Mail
             }
             return fileContent.Split(",");
         }
+        
         private static async Task Parse(IConfigurationRoot appInformation) {
             var searchParam = appInformation["searchParam"];
             var userIds = LoadUserIds(appInformation["userFileName"]);
