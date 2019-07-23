@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Graph;
-namespace crm_mail_batch
+namespace Saorsa.Outlook.Mail
 {
     class EmailMessage
     {
@@ -8,6 +8,10 @@ namespace crm_mail_batch
         private string subject;
         private EmailAddress senderEmail;
         private string message;
+
+        private string itemId;
+
+        private string conversationId;
 
         public string Subject { get => subject; set => subject = value; }
 
@@ -22,6 +26,7 @@ namespace crm_mail_batch
         }
 
         public string Message { get => message; set => message = value; }
-
+        public string ItemId { get => itemId; set => itemId = value; }
+        public string ConversationId { get => conversationId; set => conversationId = value; }
     }
 }

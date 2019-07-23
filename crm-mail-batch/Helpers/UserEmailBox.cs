@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-namespace crm_mail_batch
+namespace Saorsa.Outlook.Mail
 {
     class UserEmailBox
     {

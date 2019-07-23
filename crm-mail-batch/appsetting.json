@@ -3,6 +3,6 @@
 "applicationSecret": "",
 "tenantId": "",
 "redirectUri": "https://localhost:8080",
-"userFileName": "",
+"userFileName": "users",
 "searchParam": ""
 }
