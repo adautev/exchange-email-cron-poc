@@ -8,27 +8,27 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
-using System.Net.Http;
 
 
 namespace Saorsa.Outlook.Mail
 {
     class Program
     {
+        private static GraphServiceClient graphServiceClient;
+        private static TelemetryClient telemetryClient;
+
         static async Task Main(string[] args){
+            var appInformation = LoadApplicationInformation();
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
-            configuration.InstrumentationKey = "ENTERTELEMETRYID";
-            TelemetryClient telemetryClient = new TelemetryClient(configuration);
-            try{
-                var appInformation = LoadApplicationInformation();
-                await Program.CreateAuthorizationProvider(appInformation, telemetryClient);
-            }
-            catch(Exception ex){
+            configuration.InstrumentationKey = appInformation["telemetryId"];
+            telemetryClient = new TelemetryClient(configuration);            
+            CreateAuthorizationProvider(appInformation);
+            try {
+               await Parse(appInformation);
+            } catch (Exception ex)  {
                 telemetryClient.TrackException(ex);
-            }
-            finally{
+            } finally {
                 telemetryClient.Flush();
             }
         }
@@ -63,42 +63,22 @@ namespace Saorsa.Outlook.Mail
             }
             return fileContent.Split(",");
         }
-        private static async Task CreateAuthorizationProvider(IConfigurationRoot appInformation, TelemetryClient telemetryClient){
-            var clientId = appInformation["applicationId"];
-            var tenantId = appInformation["tenantId"];
-            var clientSecret = appInformation["applicationSecret"];
-            var redirectUri = appInformation["redirectUri"];
+        private static async Task Parse(IConfigurationRoot appInformation) {
             var searchParam = appInformation["searchParam"];
-            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
-                .Create(clientId)
-                .WithAuthority(authorityUri: $"https://login.microsoftonline.com/{tenantId}/v2.0")
-                .WithClientSecret(clientSecret)
-                .WithRedirectUri(redirectUri)
-                .Build();
-
-            ClientCredentialProvider authenticationProvider = new ClientCredentialProvider(confidentialClientApplication);
-            string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
-            
-            GraphServiceClient graphServiceClient =
-    new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) => {
-            var authResult = await confidentialClientApplication
-                .AcquireTokenForClient(scopes)
-                .ExecuteAsync();
-            requestMessage.Headers.Authorization = 
-                new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-                })
-            );
             var userIds = LoadUserIds(appInformation["userFileName"]);
             List<QueryOption> options = new List<QueryOption>{
                 new QueryOption("$search", searchParam)
             };
             List<UserEmailBox> emails = new List<UserEmailBox>();
             foreach(var item in userIds){
+                if (String.IsNullOrEmpty(item)) {
+                    continue;
+                }
                 var mailMessages = await graphServiceClient.Users[item].Messages.Request(options).Select("subject, sender, body, isRead, conversationId, id").GetAsync();
                 UserEmailBox userEmails = new UserEmailBox();
                 userEmails.UserId = item;
                 foreach(var mail in mailMessages){
-                    if(mail.IsRead == false){
+                    if(!mail.IsRead.Value){
                         telemetryClient.TrackTrace($"I got unread item for User with ID: {item} for Item ID: {mail.Id} Conversation ID: {mail.ConversationId} with Subject: {mail.Subject}");
                         EmailMessage message = new EmailMessage();
                         message.Subject = mail.Subject;
@@ -111,7 +91,32 @@ namespace Saorsa.Outlook.Mail
                 }
                 emails.Add(userEmails);
             }
+        }
+        private static void CreateAuthorizationProvider(IConfigurationRoot appInformation) {
+            var clientId = appInformation["applicationId"];
+            var tenantId = appInformation["tenantId"];
+            var clientSecret = appInformation["applicationSecret"];
+            var redirectUri = appInformation["redirectUri"];
+            
+            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .WithAuthority(authorityUri: $"https://login.microsoftonline.com/{tenantId}/v2.0")
+                .WithClientSecret(clientSecret)
+                .WithRedirectUri(redirectUri)
+                .Build();
 
+            ClientCredentialProvider authenticationProvider = new ClientCredentialProvider(confidentialClientApplication);
+            string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
+            
+            graphServiceClient =
+            new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) => {
+            var authResult = await confidentialClientApplication
+                .AcquireTokenForClient(scopes)
+                .ExecuteAsync();
+            requestMessage.Headers.Authorization = 
+                new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+                })
+            );            
         }
     }
 }
