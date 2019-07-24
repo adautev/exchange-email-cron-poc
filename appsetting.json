@@ -1,8 +1,12 @@
 {
-"applicationId": "",
-"applicationSecret": "",
-"tenantId": "",
+"applicationId": "31011e48-d322-4602-a7c3-6574b65644b3",
+"applicationSecret": "d*X6XeYyIzs5itiFZhm+ZwJ70SjwYt/*",
+"tenantId": "9dd5fc2a-b414-4c1e-8802-0a9d2b9fe7f9",
+"telemetryId" : "905fd65f-b67b-40c7-8fc4-5b7c8895caae",
 "redirectUri": "https://localhost:8080",
 "userFileName": "users",
-"searchParam": ""
+"searchParam": "\"OPT00\"",
+"SNOWUsername" : "crm.integration",
+"SNOWPassword" : "P@ss123#",
+"SNOWURL" : "https://itceooddemo7.service-now.com/api/itce2/crm/track"
 }

@@ -5,19 +5,11 @@ namespace Saorsa.Outlook.Mail
     class UserEmailBox
     {
         private string userId;
+        private string body;
 
-        private List<EmailMessage> value = new List<EmailMessage>();
+        public string Body { get => body; set => body = value; }
 
         public string UserId { get => userId; set => userId = value; }
         
-        public List<EmailMessage> GetUserEmail()
-        {
-            return value;
-        }
-
-        public void SetUserEmail(EmailMessage message)
-        {
-            value.Add(message);
-        }
     }
 }
