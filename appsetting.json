@@ -2,7 +2,11 @@
 "applicationId": "",
 "applicationSecret": "",
 "tenantId": "",
+"telemetryId" : "",
 "redirectUri": "https://localhost:8080",
 "userFileName": "users",
-"searchParam": ""
+"searchParam": "\"DMND00\"",
+"SNOWUsername" : "",
+"SNOWPassword" : "",
+"SNOWURL" : ""
 }
