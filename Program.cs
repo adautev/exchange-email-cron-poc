@@ -9,31 +9,46 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
-
+using System.Net.Http;
+using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using System.Text;
+using Serilog;
 
 namespace Saorsa.Outlook.Mail
 {
     class Program
     {
-        private static GraphServiceClient graphServiceClient;
-        private static TelemetryClient telemetryClient;
+        private static GraphServiceClient _graphServiceClient;
+        private static TelemetryClient _telemetryClient;
+        private static readonly HttpClient _client = new HttpClient();
+        private static readonly List<EmailMessage> _emails =  new List<EmailMessage>();
 
-        static async Task Main(string[] args){
+        static async Task Main(string[] args)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logs\\parser.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
             var appInformation = LoadApplicationInformation();
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
             configuration.InstrumentationKey = appInformation["telemetryId"];
-            telemetryClient = new TelemetryClient(configuration);            
+            _telemetryClient = new TelemetryClient(configuration);            
             CreateAuthorizationProvider(appInformation);
             try {
                await Parse(appInformation);
+               await SendData(appInformation);
             } catch (Exception ex)  {
-                telemetryClient.TrackException(ex);
+                Log.Error(ex,"General exception occured.");
+                _telemetryClient.TrackException(ex);
             } finally {
-                telemetryClient.Flush();
+                _telemetryClient.Flush();
             }
         }
 
-        private static IConfigurationRoot LoadApplicationInformation(){
+        private static IConfigurationRoot LoadApplicationInformation()
+        {
 
             var appInformation = new ConfigurationBuilder()
             .SetBasePath(System.IO.Directory.GetCurrentDirectory())
@@ -46,7 +61,8 @@ namespace Saorsa.Outlook.Mail
                 }
             return appInformation;
         }
-        private static string[] LoadUserIds(string fileName){
+        private static string[] LoadUserIds(string fileName)
+        {
             string path;
             string fileContent;
 
@@ -58,42 +74,59 @@ namespace Saorsa.Outlook.Mail
             }
             fileContent = System.IO.File.ReadAllText(path);
             if(string.IsNullOrEmpty(fileContent)){
-                Console.WriteLine("No user ID/s or userPrincipalName/s in the file");
+                Log.Error("No user ID/s or userPrincipalName/s in the file");
                 return null;
             }
             return fileContent.Split(",");
         }
         
-        private static async Task Parse(IConfigurationRoot appInformation) {
+        private static async Task Parse(IConfigurationRoot appInformation) 
+        {
             var searchParam = appInformation["searchParam"];
             var userIds = LoadUserIds(appInformation["userFileName"]);
             List<QueryOption> options = new List<QueryOption>{
                 new QueryOption("$search", searchParam)
             };
-            List<UserEmailBox> emails = new List<UserEmailBox>();
             foreach(var item in userIds){
                 if (String.IsNullOrEmpty(item)) {
                     continue;
                 }
-                var mailMessages = await graphServiceClient.Users[item].Messages.Request(options).Select("subject, sender, body, isRead, conversationId, id").GetAsync();
-                UserEmailBox userEmails = new UserEmailBox();
-                userEmails.UserId = item;
+                var mailMessages = await _graphServiceClient.Users[item].Messages.Request(options).Select("subject, sender, body, isRead, conversationId, id").GetAsync();
                 foreach(var mail in mailMessages){
                     if(!mail.IsRead.Value){
-                        telemetryClient.TrackTrace($"I got unread item for User with ID: {item} for Item ID: {mail.Id} Conversation ID: {mail.ConversationId} with Subject: {mail.Subject}");
-                        EmailMessage message = new EmailMessage();
+                        string messageTemplate = $"I got unread item for User with ID: {item} for Item ID: {mail.Id} Conversation ID: {mail.ConversationId} with Subject: {mail.Subject}";
+                        _telemetryClient.TrackTrace(messageTemplate);
+                        EmailMessage message = new EmailMessage(appInformation["searchParam"]);
                         message.Subject = mail.Subject;
-                        message.SetSenderEmail(mail.Sender.EmailAddress);
+                        message.SenderEmail = mail.Sender.EmailAddress;
                         message.Message = mail.Body.Content;
                         message.ItemId = mail.Id;
                         message.ConversationId = mail.ConversationId;
-                        userEmails.SetUserEmail(message);
+                        _emails.Add(message);
                     }
                 }
-                emails.Add(userEmails);
+                
             }
         }
-        private static void CreateAuthorizationProvider(IConfigurationRoot appInformation) {
+
+        private static async Task SendData(IConfigurationRoot appInformation)
+        {
+            byte[] data = System.Text.ASCIIEncoding.ASCII.GetBytes(String.Concat(appInformation["SNOWUsername"],":",appInformation["SNOWPassword"]));
+            String authHeader = System.Convert.ToBase64String(data);
+            foreach (var email in _emails)
+            {          
+                var serializer = new DataContractJsonSerializer(typeof(EmailMessage));
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", String.Concat(authHeader));
+                string serializedContent = JsonConvert.SerializeObject(email);
+                Log.Debug($"Sending {serializedContent}");
+                var serializedEmail = new StringContent(serializedContent, Encoding.UTF8, "application/json");
+                var response = await _client.PostAsync(appInformation["SNOWURL"], serializedEmail);
+                Log.Debug($"Got response {response}");
+            }
+        }
+
+        private static void CreateAuthorizationProvider(IConfigurationRoot appInformation) 
+        {
             var clientId = appInformation["applicationId"];
             var tenantId = appInformation["tenantId"];
             var clientSecret = appInformation["applicationSecret"];
@@ -109,13 +142,12 @@ namespace Saorsa.Outlook.Mail
             ClientCredentialProvider authenticationProvider = new ClientCredentialProvider(confidentialClientApplication);
             string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
             
-            graphServiceClient =
+            _graphServiceClient =
             new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) => {
             var authResult = await confidentialClientApplication
                 .AcquireTokenForClient(scopes)
                 .ExecuteAsync();
-            requestMessage.Headers.Authorization = 
-                new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
                 })
             );            
         }

@@ -4,6 +4,8 @@ project.lock.json
 .DS_Store
 *.pyc
 nupkg/
+logs/
+*.log
 
 # Visual Studio Code
 .vscode
