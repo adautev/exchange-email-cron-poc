@@ -23,39 +23,39 @@ namespace Saorsa.Outlook.Mail {
         private string _opportunityMatch { get; set; }
         public EmailMessage (string opportunityMatch) {
             this._opportunityMatch = opportunityMatch;
-            this.recipients = new List<Recipient>();
+            this._recipients = new List<Recipient>();
         }
-        private string subject;
-        private EmailAddress senderEmail;
-        private string message;
+        private string _subject;
+        private EmailAddress _senderEmail;
+        private string _message;
 
-        private string itemId;
+        private string _itemId;
 
-        private string conversationId;
-        private List<Recipient> recipients;
+        private string _conversationId;
+        private List<Recipient> _recipients;
 
         [DataMember (Name = "subject")]
-        public string Subject { get => subject; set => subject = value; }
+        public string Subject { get => _subject; set => _subject = value; }
 
-        public EmailAddress SenderEmail { get => senderEmail; set => senderEmail = value; }
+        public EmailAddress SenderEmail { get => _senderEmail; set => _senderEmail = value; }
 
-        public string Email { get => senderEmail.Address; }
+        public string Email { get => _senderEmail.Address; }
 
         [DataMember (Name = "mailBody")]
-        public string Message { get => message; set => message = value; }
+        public string Message { get => _message; set => _message = value; }
 
         [DataMember (Name = "mailItemId")]
-        public string ItemId { get => itemId; set => itemId = value; }
+        public string ItemId { get => _itemId; set => _itemId = value; }
 
         [DataMember (Name = "conversationId")]
-        public string ConversationId { get => conversationId; set => conversationId = value; }
+        public string ConversationId { get => _conversationId; set => _conversationId = value; }
 
         [DataMember (Name = "recipients")]
-        public IEnumerable<Recipient> Recipients { get => recipients; }
+        public IEnumerable<Recipient> Recipients { get => _recipients; }
         
         public void SetRecipient(IEnumerable<Microsoft.Graph.Recipient> recipients) {
             if (recipients != null && recipients.Count() > 0) {
-                this.recipients.AddRange(recipients.Select(r=> new Recipient(r.EmailAddress.Name, r.EmailAddress.Address)));
+                this._recipients.AddRange(recipients.Select(r=> new Recipient(r.EmailAddress.Name, r.EmailAddress.Address)));
             }
         }
 
