@@ -5,8 +5,8 @@
 "telemetryId" : "905fd65f-b67b-40c7-8fc4-5b7c8895caae",
 "redirectUri": "https://localhost:8080",
 "userFileName": "users",
-"searchParam": "\"OPT00\"",
+"searchParam": "\"DMND00\"",
 "SNOWUsername" : "crm.integration",
-"SNOWPassword" : "P@ss123#",
+"SNOWPassword" : "kukumQvk!",
 "SNOWURL" : "https://itceooddemo7.service-now.com/api/itce2/crm/track"
 }

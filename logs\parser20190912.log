@@ -1,0 +1,32 @@
+2019-09-12 12:07:55.471 +03:00 [DBG] Sending {"subject":"Bob booo OPT000129102","mailBody":"<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n<meta content=\"text/html; charset=iso-8859-1\">\r\n<style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style>\r\n</head>\r\n<body dir=\"ltr\">\r\n<div id=\"divtagdefaultwrapper\" dir=\"ltr\" style=\"font-size:12pt; color:#000000; font-family:Calibri,Helvetica,sans-serif\">\r\n<p style=\"margin-top:0; margin-bottom:0\"><br>\r\n</p>\r\n</div>\r\n</body>\r\n</html>\r\n","mailItemId":"AAMkADA2MTQ4ZjIzLTM5MzMtNGZkNS04NjM2LTQ4Nzk2ODYzNzg4MwBGAAAAAACSMZQfVUAkS5AIObgtI8OaBwCdn0Kw4d0dQ7bJx0cOUhAcAAAAAAENAADxMYbFI0cIS6LeyZC2tQMVAAKrXN_5AAA=","conversationId":"AAQkADA2MTQ4ZjIzLTM5MzMtNGZkNS04NjM2LTQ4Nzk2ODYzNzg4MwAQAMuHjwX0F8ZGlFf-OmbJV8c=","recipients":[],"opportunityId":"OPT000129102"}
+2019-09-12 12:07:56.617 +03:00 [DBG] Got response StatusCode: 401, ReasonPhrase: 'Unauthorized', Version: 1.1, Content: System.Net.Http.HttpConnection+HttpConnectionResponseContent, Headers:
+{
+  Set-Cookie: JSESSIONID=ED8184D094A6E3839D771E05F6899E4C; Path=/; HttpOnly;Secure
+  Set-Cookie: BIGipServerpool_itceooddemo7=612686858.43582.0000; path=/; Httponly; Secure
+  WWW-Authenticate: BASIC realm="Service-now"
+  Pragma: no-store
+  Pragma: no-cache
+  Cache-Control: no-cache,no-store,must-revalidate,max-age=-1
+  Transfer-Encoding: chunked
+  Date: Thu, 12 Sep 2019 09:07:56 GMT
+  Server: ServiceNow
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  Connection: close
+  Expires: 0
+  Content-Type: application/json; charset=UTF-8
+}
+2019-09-12 12:07:56.620 +03:00 [DBG] Sending {"subject":"Hey ho OPT00000019 (;","mailBody":"<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n<meta content=\"text/html; charset=iso-8859-1\">\r\n<style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style>\r\n</head>\r\n<body dir=\"ltr\">\r\n<div id=\"divtagdefaultwrapper\" dir=\"ltr\" style=\"font-size:12pt; color:#000000; font-family:Calibri,Helvetica,sans-serif\">\r\n<p style=\"margin-top:0; margin-bottom:0\"><br>\r\n</p>\r\n</div>\r\n</body>\r\n</html>\r\n","mailItemId":"AAMkADA2MTQ4ZjIzLTM5MzMtNGZkNS04NjM2LTQ4Nzk2ODYzNzg4MwBGAAAAAACSMZQfVUAkS5AIObgtI8OaBwCdn0Kw4d0dQ7bJx0cOUhAcAAAAAAENAADxMYbFI0cIS6LeyZC2tQMVAAKrXN_4AAA=","conversationId":"AAQkADA2MTQ4ZjIzLTM5MzMtNGZkNS04NjM2LTQ4Nzk2ODYzNzg4MwAQAGsCBNKB_TVLqQ8joetW6C4=","recipients":[],"opportunityId":"OPT00000019"}
+2019-09-12 12:07:57.143 +03:00 [DBG] Got response StatusCode: 401, ReasonPhrase: 'Unauthorized', Version: 1.1, Content: System.Net.Http.HttpConnection+HttpConnectionResponseContent, Headers:
+{
+  WWW-Authenticate: BASIC realm="Service-now"
+  Pragma: no-store
+  Pragma: no-cache
+  Cache-Control: no-cache,no-store,must-revalidate,max-age=-1
+  Transfer-Encoding: chunked
+  Date: Thu, 12 Sep 2019 09:07:56 GMT
+  Server: ServiceNow
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  Connection: close
+  Expires: 0
+  Content-Type: application/json; charset=UTF-8
+}

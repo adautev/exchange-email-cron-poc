@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Runtime.Serialization.Json;
 using Newtonsoft.Json;
 using System.Text;
+using Serilog;
 
 namespace Saorsa.Outlook.Mail
 {
@@ -25,6 +26,11 @@ namespace Saorsa.Outlook.Mail
 
         static async Task Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.File("logs\\parser.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
             var appInformation = LoadApplicationInformation();
             TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
             configuration.InstrumentationKey = appInformation["telemetryId"];
@@ -34,6 +40,7 @@ namespace Saorsa.Outlook.Mail
                await Parse(appInformation);
                await SendData(appInformation);
             } catch (Exception ex)  {
+                Log.Error(ex,"General exception occured.");
                 telemetryClient.TrackException(ex);
             } finally {
                 telemetryClient.Flush();
@@ -67,7 +74,7 @@ namespace Saorsa.Outlook.Mail
             }
             fileContent = System.IO.File.ReadAllText(path);
             if(string.IsNullOrEmpty(fileContent)){
-                Console.WriteLine("No user ID/s or userPrincipalName/s in the file");
+                Log.Error("No user ID/s or userPrincipalName/s in the file");
                 return null;
             }
             return fileContent.Split(",");
@@ -87,7 +94,8 @@ namespace Saorsa.Outlook.Mail
                 var mailMessages = await graphServiceClient.Users[item].Messages.Request(options).Select("subject, sender, body, isRead, conversationId, id").GetAsync();
                 foreach(var mail in mailMessages){
                     if(!mail.IsRead.Value){
-                        telemetryClient.TrackTrace($"I got unread item for User with ID: {item} for Item ID: {mail.Id} Conversation ID: {mail.ConversationId} with Subject: {mail.Subject}");
+                        string messageTemplate = $"I got unread item for User with ID: {item} for Item ID: {mail.Id} Conversation ID: {mail.ConversationId} with Subject: {mail.Subject}";
+                        telemetryClient.TrackTrace(messageTemplate);
                         EmailMessage message = new EmailMessage(appInformation["searchParam"]);
                         message.Subject = mail.Subject;
                         message.SenderEmail = mail.Sender.EmailAddress;
@@ -109,8 +117,11 @@ namespace Saorsa.Outlook.Mail
             {          
                 var serializer = new DataContractJsonSerializer(typeof(EmailMessage));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", String.Concat(authHeader));
-                var serializedEmail = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
+                string serializedContent = JsonConvert.SerializeObject(email);
+                Log.Debug($"Sending {serializedContent}");
+                var serializedEmail = new StringContent(serializedContent, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(appInformation["SNOWURL"], serializedEmail);
+                Log.Debug($"Got response {response}");
             }
         }
 
