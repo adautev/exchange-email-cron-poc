@@ -7,3 +7,5 @@ File users.txt must be in the root program folder, containing comma separated UI
 
 ### Microsoft Graph authentication
 Create an Azure app and give Mail.Read API access. Get App secret and configure it into appsettings.json.
+
+:)
